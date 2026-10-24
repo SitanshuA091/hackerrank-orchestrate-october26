@@ -2,7 +2,7 @@ import argparse
 import json
 import sys
 from statistics import median
-
+from collections import Counter
 import pandas as pd
 
 from ghost_audit import activity
@@ -70,17 +70,52 @@ def sweep(data, expected):
         print(f"window=+-{width:>5}m recall={hit}/{want} precision={hit}/{got} avg_candidates={sum(counts) / len(counts):.1f}")
 
 
+def candidates(data, expected, lo, hi):
+    from ghost_audit.evidence import build_index
+    from ghost_audit.linking import LinkIndex
+
+    observations, _ = build_index()
+    index = LinkIndex(observations)
+    worker = worker_rows()
+    scoped = worker["resource_id"].str.startswith(("account_", "analytics_"))
+    keyless = ~worker["resource_id"].map(lambda rid: bool(index.keys.get(rid)))
+    pool = worker[scoped & keyless]
+    totals = Counter()
+    for _, case in data.sample_requests.iterrows():
+        target = {
+            rid
+            for rid in expected[case["case_id"]]
+            if rid.startswith(("account_", "analytics_")) and not index.keys.get(rid)
+        }
+        gaps = (pool["ts"] - case["reported_at"]).map(minutes)
+        rows = pool[(gaps >= lo) & (gaps <= hi)]
+        got = set(rows["resource_id"])
+        totals["target"] += len(target)
+        totals["hit"] += len(target & got)
+        totals["candidates"] += len(got)
+        print(f"\n{case['case_id']} reported={case['reported_at']} target={sorted(target)} hit={len(target & got)}/{len(target)} candidates={len(got)}")
+        for _, row in rows.iterrows():
+            gap = minutes(row["ts"] - case["reported_at"])
+            flag = "*" if row["resource_id"] in target else " "
+            print(f"  {flag} {row['resource_id']:<16} {row['event_type']:<16} {row['reported_result']:<8} {gap:8.1f}m {row['activity_id']}")
+    print("\ntotals:", dict(totals))
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["deltas", "sweep"])
+    parser.add_argument("mode", choices=["deltas", "sweep", "candidates"])
+    parser.add_argument("--lo", type=float, default=-90)
+    parser.add_argument("--hi", type=float, default=130)
     args = parser.parse_args()
     data = load_dataset()
     expected = expected_resources(data)
     if args.mode == "deltas":
         deltas(data, expected)
-    else:
+    elif args.mode == "sweep":
         sweep(data, expected)
+    else:
+        candidates(data, expected, args.lo, args.hi)
 
 
 if __name__ == "__main__":

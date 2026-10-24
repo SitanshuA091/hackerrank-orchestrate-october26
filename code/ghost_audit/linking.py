@@ -3,9 +3,10 @@ import json
 import sqlite3
 import sys
 from collections import Counter, defaultdict
+import re
 
 from ghost_audit import activity
-from ghost_audit.evidence import build_index, identity_keys
+from ghost_audit.evidence import PREFIX_SYSTEM, build_index, identity_keys
 from ghost_audit.identity import IdentityResolver
 from ghost_audit.loaders import evidence_path, load_dataset
 
@@ -31,7 +32,7 @@ class LinkIndex:
         for rid, keys in self.keys.items():
             for key in keys:
                 self.by_key[key].add(rid)
-
+                
     def resources_for(self, keys):
         direct = set()
         for key in keys:
@@ -39,8 +40,11 @@ class LinkIndex:
         linked = set()
         for rid in direct:
             linked |= self.edges.get(rid, set())
-        return direct, linked - direct
-
+        def keep(rid):
+            return rid.rsplit("_", 1)[0] in PREFIX_SYSTEM
+        direct = {rid for rid in direct if keep(rid)}
+        linked = {rid for rid in linked - direct if keep(rid)}
+        return direct, linked
 
 def expected_for(data):
     out = {}
@@ -56,7 +60,10 @@ def expected_for(data):
 
 def summarize(item):
     flag = "*" if item.inferred else ""
-    return f"{item.file_id} {item.kind} ts={item.ts} present={item.present}{flag} keys={len(item.keys)} store={item.store}"
+    extra = ""
+    if item.enabled is not None or item.restore_allowed is not None:
+        extra = f" enabled={item.enabled} restore={item.restore_allowed}"
+    return f"{item.file_id} {item.kind} ts={item.ts} present={item.present}{flag} keys={len(item.keys)} store={item.store}{extra}"
 
 
 def describe(index, rid, meta, expected_ev="", limit=6):
@@ -119,17 +126,31 @@ def probe_file(file_id, observations, meta):
             count = connection.execute(f'select count(*) from "{name}"').fetchone()[0]
             print("   table", name, count)
 
+def grep(tokens):
+    from ghost_audit.loaders import list_evidence
+
+    patterns = [re.compile(re.escape(token) + r"(?!\d)") for token in tokens]
+    for path in list_evidence():
+        if path.suffix.lower() not in (".sql", ".log", ".json", ".txt"):
+            continue
+        for number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+            if any(pattern.search(line) for pattern in patterns):
+                print(f"{path.name}:{number}: {line[:320]}")
+
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["calibrate", "where", "file"])
+    parser.add_argument("mode", choices=["calibrate", "where", "file", "grep"])
     parser.add_argument("ids", nargs="*")
     parser.add_argument("--limit", type=int, default=32)
     parser.add_argument("--explain", action="store_true")
     args = parser.parse_args()
     if args.mode == "calibrate":
         calibrate(args.limit, args.explain)
+        return
+    if args.mode == "grep":
+        grep(args.ids)
         return
     observations, meta = build_index()
     if args.mode == "file":
@@ -139,7 +160,6 @@ def main():
     index = LinkIndex(observations)
     for rid in args.ids:
         describe(index, rid, meta)
-
 
 if __name__ == "__main__":
     main()

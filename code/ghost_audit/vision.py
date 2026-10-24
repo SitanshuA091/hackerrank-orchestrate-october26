@@ -4,7 +4,7 @@ import sys
 import time
 from pathlib import Path
 
-from ghost_audit.evidence import PREFIX_SYSTEM, make_obs, prefix_of
+from ghost_audit.evidence import PREFIX_SYSTEM, RES_RE, USER_RE, make_obs, prefix_of
 from ghost_audit.llm import LLMRouter
 from ghost_audit.loaders import evidence_path, read_csv
 
@@ -24,7 +24,50 @@ PROMPT = (
     "deleted, or no results for it. Preserve resource ids such as account_123 or search_45 exactly. "
     "Never infer or invent values."
 )
+def pick_resource(record):
+    for field in ("resource_id", "system_id", "name"):
+        value = str(record.get(field) or "").strip()
+        if RES_RE.fullmatch(value):
+            return value
+    return ""
 
+
+def infer_enabled(record):
+    if record.get("enabled") is not None:
+        return record["enabled"]
+    status = str(record.get("status") or "").lower()
+    if status in ("healthy", "live", "active", "enabled", "running"):
+        return True
+    if status in ("paused", "stopped", "disabled", "inactive"):
+        return False
+    return None
+
+
+def to_obs(file_id, captured, stem):
+    entry = load_cache().get(file_id)
+    if not entry:
+        return []
+    records = entry.get("records", []) if isinstance(entry, dict) else entry
+    out = []
+    for record in records:
+        rid = pick_resource(record)
+        if not rid:
+            continue
+        name = str(record.get("name") or "")
+        user = str(record.get("user_id") or "")
+        items = [
+            ("full_name", None if RES_RE.fullmatch(name) else name),
+            ("email", record.get("email")),
+            ("phone", record.get("phone")),
+            ("email_hash", record.get("email_hash")),
+            ("user_id", user if USER_RE.fullmatch(user) else None),
+        ]
+        state = [("enabled", infer_enabled(record)), ("restore_allowed", record.get("restore_allowed"))]
+        system = PREFIX_SYSTEM.get(prefix_of(rid), "")
+        out.append(
+            make_obs(file_id, "image", captured, rid, system, stem, str(record.get("record_type") or ""), items, record.get("exists"), state)
+        )
+    return out
 
 def load_cache():
     if CACHE_FILE.exists():

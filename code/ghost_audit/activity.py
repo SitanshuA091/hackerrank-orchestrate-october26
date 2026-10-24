@@ -109,6 +109,26 @@ def main():
         print(f"\n=== {rid} ===")
         print(rows_for(rid)[["activity_id", "event_time", "event_type", "source_system", "target_system", "reported_result", "details"]].to_string(index=False))
 
+OP_ACTION = {
+    "DELETE_RECORD": "DELETE",
+    "ANONYMIZE_RECORD": "ANONYMIZE",
+    "REDACT_RECORD": "REDACT",
+    "DISABLE_DATA_FLOW": "DISABLE",
+    "BLOCK_RESTORE": "BLOCK",
+    "RETAIN_RECORD": "RETAIN",
+}
+
+
+def policy_ops(resource_id, worker_only=False):
+    frame = load()
+    rows = frame.loc[by_resource().get(resource_id, [])]
+    rows = rows[rows["event_type"].isin(OP_ACTION)]
+    if worker_only:
+        rows = rows[rows["source_system"] == "deletion_worker"]
+    return [
+        (row["ts"], OP_ACTION[row["event_type"]], row["reported_result"], row["source_system"])
+        for _, row in rows.iterrows()
+    ]
 
 if __name__ == "__main__":
     main()

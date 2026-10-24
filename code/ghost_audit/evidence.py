@@ -29,7 +29,6 @@ PREFIX_SYSTEM = {
     "legal_hold": "legal_service",
     "identity": "identity_service",
     "tombstone": "identity_service",
-    "object": "object_storage",
 }
 
 EMAIL_RE = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}")
@@ -403,14 +402,21 @@ def build_index(rebuild=False):
         try:
             path = evidence_path(row["file_path"])
             ext = path.suffix.lower()
-            entry["kind"] = ext.lstrip(".")
             if ext == ".sql":
                 found, scope = sql_obs(path, file_id, captured)
                 entry["scope"] = scope
+                entry["listing"] = True
+                entry["covers"] = sorted(set(scope) | {item.system for item in found if item.system})
             elif ext == ".log":
                 found = log_obs(path, file_id, captured)
             elif ext == ".json":
-                found = json_obs(json.loads(path.read_text(encoding="utf-8", errors="replace")), file_id, captured)
+                payload = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+                found = json_obs(payload, file_id, captured)
+                if isinstance(payload, dict) and "snapshots" in payload:
+                    entry["listing"] = True
+                    entry["covers"] = sorted(
+                        {snap.get("data_store", "") for snap in payload["snapshots"] if isinstance(snap, dict)} - {""}
+                    )
             elif ext == ".txt":
                 found = txt_obs(path, file_id, captured)
             elif ext == ".pdf":

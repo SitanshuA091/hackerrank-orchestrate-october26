@@ -1,0 +1,205 @@
+uv run python -m ghost_audit.pipeline sample --oracle --show 8
+xpect cases 10, 12, 14 and 17 to flip if the worker-op prior holds, and case 04’s citation to change to evidence_54.
+attribution: correct=15 assigned=17 keyless_expected=26
+
+case_31 exp=COMPLETE got=COMPLETE sequence_ok=True
+   EVIDENCE ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_4857', 'ABSENT') expected evidence_51 got evidence_07
+
+status accuracy      : 32/32
+step recall          : 193/193
+step precision       : 193/193
+evidence on matched  : 192/193
+order ok (common)    : 32/32
+exact sequence       : 32/32
+perfect cases        : 31/32
+
+uv run python -m ghost_audit.pipeline sample --attr none
+three e2e runs that show what each attribution level buys. The attribution: line gives correct/assigned/keyless counts.
+attribution: correct=0 assigned=0 keyless_expected=26
+
+case_01 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_001', 'ABSENT')
+
+case_02 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_002', 'ABSENT')
+
+case_03 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_9406', 'ANONYMIZED')
+
+case_04 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_004', 'ABSENT')
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_901', 'ANONYMIZED')
+
+case_07 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_007', 'ABSENT')
+
+case_08 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_008', 'ABSENT')
+
+case_10 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_010', 'ABSENT')
+
+case_17 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_REDACTED', 'identity_service', 'tombstone_17', 'REDACTED')
+
+status accuracy      : 32/32
+step recall          : 167/193
+step precision       : 167/168
+evidence on matched  : 167/167
+order ok (common)    : 32/32
+exact sequence       : 11/32
+perfect cases        : 11/32
+
+uv run python -m ghost_audit.pipeline sample --attr account
+attribution: correct=13 assigned=14 keyless_expected=26
+
+case_03 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_9406', 'ANONYMIZED')
+
+case_04 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_004', 'ABSENT')
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_901', 'ANONYMIZED')
+
+case_17 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_REDACTED', 'identity_service', 'tombstone_17', 'REDACTED')
+
+case_18 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_PRESENT', 'security_service', 'audit_record_6645', 'PRESENT')
+
+case_20 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_PRESENT', 'security_service', 'audit_record_5569', 'PRESENT')
+
+case_21 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_6440', 'ABSENT')
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_5335', 'ANONYMIZED')
+
+case_22 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_4990', 'ABSENT')
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_6829', 'ABSENT')
+
+case_23 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_410', 'ABSENT')
+
+status accuracy      : 32/32
+step recall          : 180/193
+step precision       : 180/182
+evidence on matched  : 179/180
+order ok (common)    : 32/32
+exact sequence       : 20/32
+perfect cases        : 19/32
+
+uv run python -m ghost_audit.pipeline sample --attr all    
+attribution: correct=15 assigned=17 keyless_expected=26
+
+case_04 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_004', 'ABSENT')
+
+case_11 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_9447', 'ANONYMIZED')
+
+case_17 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_REDACTED', 'identity_service', 'tombstone_17', 'REDACTED')
+
+case_18 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_PRESENT', 'security_service', 'audit_record_6645', 'PRESENT')
+
+case_20 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_PRESENT', 'security_service', 'audit_record_5569', 'PRESENT')
+
+case_21 exp=COMPLETE got=COMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_6440', 'ABSENT')
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ANONYMIZED', 'analytics_platform', 'analytics_5335', 'ANONYMIZED')
+
+case_22 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_4990', 'ABSENT')
+   EXTRA   ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_6829', 'ABSENT')
+
+case_23 exp=INCOMPLETE got=INCOMPLETE sequence_ok=False
+   MISSING ('VERIFICATION', 'VERIFY_RECORD_ABSENT', 'account_service', 'account_410', 'ABSENT')
+
+status accuracy      : 32/32
+step recall          : 182/193
+step precision       : 182/185
+evidence on matched  : 181/182
+order ok (common)    : 32/32
+exact sequence       : 20/32
+perfect cases        : 19/32
+
+above are three e2e runs that show what each attribution level buys. The attribution: line gives correct/assigned/keyless counts.
+
+uv run python -m ghost_audit.pipeline explain --case case_11 case_24 --oracle
+use this if cases 11 (data_flow_9522) and 24 (account_5334) are still wrong. It prints every observation, worker op and computed state next to the expected steps.
+case_11 novak.tomasz@icloud.com COMPLETE reported 2026-09-12 12:00:00+00:00 audit 2026-10-01 12:00:00+00:00
+expected status: INCOMPLETE | owned: ['account_4248', 'analytics_2034', 'analytics_9447', 'audit_record_9394', 'data_flow_9522', 'search_052', 'support_864'] | expected resources: ['account_4248', 'analytics_2034', 'audit_record_9394', 'data_flow_9522', 'search_052', 'support_864']
+
+[OK] account_4248 action=DELETE bad=False present=False enabled=None restore=None pii={} cite_present= cite_absent=evidence_03
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= False inferred= False store= handover type= USER_PROFILE enabled= None restore= None
+   OP  2026-09-12 11:04:43+00:00 DELETE SUCCESS deletion_worker
+   EXP VERIFICATION VERIFY_RECORD_ABSENT -
+
+[OK] analytics_2034 action=ANONYMIZE bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= True store= handover type= ANALYTICS_PROFILE enabled= None restore= None
+   OP  2026-09-12 13:33:34+00:00 ANONYMIZE FAILED deletion_worker
+   EXP FINDING REPORT_EXPOSED_PII evidence_03
+   EXP REMEDIATION ANONYMIZE_RECORD -
+   EXP VERIFICATION VERIFY_RECORD_ANONYMIZED -
+
+[EXTRA] analytics_9447 action=ANONYMIZE bad=False present=True enabled=None restore=None pii={} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= True store= handover type= ANALYTICS_PROFILE enabled= None restore= None
+   OP  2026-09-12 11:31:08+00:00 ANONYMIZE SUCCESS deletion_worker
+
+[OK] audit_record_9394 action=RETAIN bad=False present=True enabled=None restore=None pii={'ref': True} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= False store= handover type= SECURITY_AUDIT_LOG enabled= None restore= None
+   EXP VERIFICATION VERIFY_RECORD_PRESENT -
+
+[OK] data_flow_9522 action=DISABLE bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= True store= handover type= DATA_FLOW enabled= None restore= None
+   EXP FINDING REPORT_ACTIVE_DATA_FLOW evidence_03
+   EXP REMEDIATION DISABLE_DATA_FLOW -
+   EXP VERIFICATION VERIFY_DATA_FLOW_DISABLED -
+
+[OK] search_052 action=DELETE bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= False store= handover type= SEARCH_INDEX_ENTRY enabled= None restore= None
+   OP  2026-09-12 12:55:35+00:00 DELETE FAILED deletion_worker
+   EXP FINDING REPORT_REMAINING_RECORD evidence_03
+   EXP REMEDIATION DELETE_RECORD -
+   EXP VERIFICATION VERIFY_RECORD_ABSENT -
+
+[OK] support_864 action=REDACT bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_03 cite_absent=evidence_05
+   OBS evidence_03 txt 2026-10-01T12:00:00Z present= True inferred= True store= handover type= SUPPORT_MESSAGE enabled= None restore= None
+   OP  2026-09-12 13:14:05+00:00 REDACT FAILED deletion_worker
+   EXP FINDING REPORT_EXPOSED_PII evidence_03
+   EXP REMEDIATION REDACT_RECORD -
+   EXP VERIFICATION VERIFY_RECORD_REDACTED -
+
+================================================================================
+
+case_24 keiko.nakamura@gmail.com COMPLETE reported 2026-09-02 12:00:00+00:00 audit 2026-09-15 12:00:00+00:00
+expected status: INCOMPLETE | owned: ['account_5334', 'audit_record_7095', 'search_5577'] | expected resources: ['account_5334', 'audit_record_7095', 'search_5577']
+
+[OK] account_5334 action=DELETE bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_92 cite_absent=evidence_07
+   OBS evidence_02 json 2026-09-15T12:00:00Z present= True inferred= True store= records type=  enabled= None restore= None
+   OBS evidence_92 json 2026-09-15T09:41:33Z present= True inferred= False store= profile_lookups type=  enabled= None restore= None
+   OP  2026-09-02 10:59:41+00:00 DELETE SUCCESS deletion_worker
+   EXP FINDING REPORT_REMAINING_RECORD evidence_92
+   EXP REMEDIATION DELETE_RECORD -
+   EXP VERIFICATION VERIFY_RECORD_ABSENT -
+
+[OK] audit_record_7095 action=RETAIN bad=False present=False enabled=None restore=None pii={} cite_present= cite_absent=evidence_51
+   OBS evidence_02 json 2026-09-15T12:00:00Z present= True inferred= True store= records type=  enabled= None restore= None
+   EXP VERIFICATION VERIFY_RECORD_PRESENT -
+
+[OK] search_5577 action=DELETE bad=True present=True enabled=None restore=None pii={'email': True} cite_present=evidence_92 cite_absent=evidence_07
+   OBS evidence_02 json 2026-09-15T12:00:00Z present= True inferred= True store= records type=  enabled= None restore= None
+   OBS evidence_92 json 2026-09-15T10:01:51Z present= True inferred= True store= index_queries type=  enabled= None restore= None
+   OP  2026-09-02 13:04:03+00:00 DELETE SUCCESS deletion_worker
+   EXP FINDING REPORT_REMAINING_RECORD evidence_92
+   EXP REMEDIATION DELETE_RECORD -
+   EXP VERIFICATION VERIFY_RECORD_ABSENT -
+
+================================================================================
+
+uv run python -m ghost_audit.linking grep audit_record_1105 audit_record_6645:
+the first is a control that should hit.
+resource_lookup_trace_20260926_103856.log:12: 2026-09-26T08:10:20Z level=DEBUG service=security_service trace_id=rb-081020-006 event=audit_record_read_started resource_id=audit_record_1105 lookup_key=user_42
+resource_lookup_trace_20260926_103856.log:13: 2026-09-26T08:10:20Z level=INFO service=security_service trace_id=rb-081020-006 event=audit_record_read_completed resource_id=audit_record_1105 rows=1 subject_reference=user_42 event_code=IDENTITY_CHANGE_RECORDED retention_until=2034-09-30T23:59:59Z
